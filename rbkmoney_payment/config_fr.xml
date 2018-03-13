@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>rbkmoney_payment</name>
+    <displayName><![CDATA[RBKmoney système de paiement]]></displayName>
+    <version><![CDATA[1.0.0]]></version>
+    <description><![CDATA[Accepter les paiements par RBKmoney système de paiement]]></description>
+    <author><![CDATA[RBKmoney]]></author>
+    <tab><![CDATA[payments_gateways]]></tab>
+	<confirmUninstall><![CDATA[Êtes-vous sûr que vous voulez supprimer vos informations personnelles?]]></confirmUninstall>
+    <is_configurable>1</is_configurable>
+    <need_instance>1</need_instance>
+	<limited_countries></limited_countries>
+</module>
