@@ -10,8 +10,8 @@ $_MODULE['<{rbkmoney_payment}prestashop>rbkmoney_payment_f45d1ccef95c393b9488535
 $_MODULE['<{rbkmoney_payment}prestashop>rbkmoney_payment_e537a4522c35016b826545f3ea488f7f'] = 'Configuration of the payment module RBKmoney';
 $_MODULE['<{rbkmoney_payment}prestashop>rbkmoney_payment_b45419fdb865ff3a8a4b01a22307998a'] = 'Mandatory settings';
 $_MODULE['<{rbkmoney_payment}prestashop>rbkmoney_payment_24f6d0a5e981497218465d35e9702dae'] = 'Shop ID';
-$_MODULE['<{rbkmoney_payment}prestashop>rbkmoney_payment_d88944933da63e116ea02de42748543f'] = 'Your key to access API from';
-$_MODULE['<{rbkmoney_payment}prestashop>rbkmoney_payment_3231caef526f2897016a45d6a8356d78'] = 'Key signatures received on the Webhook notification from';
+$_MODULE['<{rbkmoney_payment}prestashop>rbkmoney_payment_d88944933da63e116ea02de42748543f'] = 'Api key';
+$_MODULE['<{rbkmoney_payment}prestashop>rbkmoney_payment_3231caef526f2897016a45d6a8356d78'] = 'Public key';
 $_MODULE['<{rbkmoney_payment}prestashop>rbkmoney_payment_8836dc60baab3ea9a8494879f7083a61'] = 'Customization of forms of payment';
 $_MODULE['<{rbkmoney_payment}prestashop>rbkmoney_payment_de744f6c62885fd8a8ef7de61b3f48e1'] = 'URL logo';
 $_MODULE['<{rbkmoney_payment}prestashop>rbkmoney_payment_2d8f701fed0dde2107f7bfb14541ee16'] = 'The text of the button open a form of payment';

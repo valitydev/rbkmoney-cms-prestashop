@@ -27,7 +27,6 @@ class Rbkmoney_Payment extends PaymentModule
     const RBKM_WEBHOOK_KEY = 'RBKM_WEBHOOK_KEY';
 
     // Optional
-    const RBKM_PAYFORM_PATH_LOGO = 'RBKM_PAYFORM_PATH_LOGO';
     const RBKM_PAYFORM_BUTTON_LABEL = 'RBKM_PAYFORM_BUTTON_LABEL';
     const RBKM_PAYFORM_DESCRIPTION = 'RBKM_PAYFORM_DESCRIPTION';
     const RBKM_PAYFORM_COMPANY_NAME = 'RBKM_PAYFORM_COMPANY_NAME';
@@ -49,7 +48,7 @@ class Rbkmoney_Payment extends PaymentModule
     {
         $this->name = 'rbkmoney_payment';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.0';
+        $this->version = '1.0.1';
         $this->author = 'RBKmoney';
         $this->need_instance = 1;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
@@ -83,11 +82,9 @@ class Rbkmoney_Payment extends PaymentModule
         if (!Configuration::updateValue(static::RBKM_SHOP_ID, static::RBKM_SHOP_ID_DEFAULT)
             || !Configuration::updateValue(static::RBKM_API_KEY, '')
             || !Configuration::updateValue(static::RBKM_WEBHOOK_KEY, '')
-            || !Configuration::updateValue(static::RBKM_PAYFORM_PATH_LOGO, '')
             || !Configuration::updateValue(static::RBKM_PAYFORM_BUTTON_LABEL, '')
             || !Configuration::updateValue(static::RBKM_PAYFORM_DESCRIPTION, '')
             || !Configuration::updateValue(static::RBKM_PAYFORM_COMPANY_NAME, '')
-            || !Configuration::updateValue(static::RBKM_PAYFORM_CSS_BUTTON, '')
             || !Configuration::updateValue(static::RBKM_DEBUG, static::RBKM_DEBUG_FALSE)
         ) {
             return false;
@@ -106,7 +103,6 @@ class Rbkmoney_Payment extends PaymentModule
             static::RBKM_API_KEY,
             static::RBKM_WEBHOOK_KEY,
 
-            static::RBKM_PAYFORM_PATH_LOGO,
             static::RBKM_PAYFORM_BUTTON_LABEL,
             static::RBKM_PAYFORM_DESCRIPTION,
             static::RBKM_PAYFORM_COMPANY_NAME,
@@ -138,7 +134,6 @@ class Rbkmoney_Payment extends PaymentModule
                 'rbkm_api_key' => static::RBKM_API_KEY,
                 'rbkm_webhook_key' => static::RBKM_WEBHOOK_KEY,
 
-                'rbkm_payform_path_logo' => static::RBKM_PAYFORM_PATH_LOGO,
                 'rbkm_payform_button_label' => static::RBKM_PAYFORM_BUTTON_LABEL,
                 'rbkm_payform_description' => static::RBKM_PAYFORM_DESCRIPTION,
                 'rbkm_payform_company_name' => static::RBKM_PAYFORM_COMPANY_NAME,
@@ -169,11 +164,9 @@ class Rbkmoney_Payment extends PaymentModule
         $rbkm_api_key = htmlentities(Configuration::get(static::RBKM_API_KEY), ENT_COMPAT, static::CHARSET);
         $rbkm_webhook_key = htmlentities(Configuration::get(static::RBKM_WEBHOOK_KEY), ENT_COMPAT, static::CHARSET);
 
-        $rbkm_payform_path_logo = htmlentities(Configuration::get(static::RBKM_PAYFORM_PATH_LOGO), ENT_COMPAT, static::CHARSET);
         $rbkm_payform_button_label = htmlentities(Configuration::get(static::RBKM_PAYFORM_BUTTON_LABEL), ENT_COMPAT, static::CHARSET);
         $rbkm_payform_description = htmlentities(Configuration::get(static::RBKM_PAYFORM_DESCRIPTION), ENT_COMPAT, static::CHARSET);
         $rbkm_payform_company_name = htmlentities(Configuration::get(static::RBKM_PAYFORM_COMPANY_NAME), ENT_COMPAT, static::CHARSET);
-        $rbkm_payform_css_button = htmlentities(Configuration::get(static::RBKM_PAYFORM_CSS_BUTTON), ENT_COMPAT, static::CHARSET);
 
 
         if (htmlentities(Configuration::get(static::RBKM_DEBUG), ENT_COMPAT, static::CHARSET) == 'true') {
@@ -195,23 +188,18 @@ class Rbkmoney_Payment extends PaymentModule
 			        <input type="text" name="rbkm_shop_id" id="rbkm_shop_id" size="121px" value="' . $rbkm_shop_id . '" />
 			    </div>
 			    
-			    <label for="rbkm_api_key">' . $this->l('Ваш ключ для доступа к API из') .' <a target="_blank" href="https://dashboard.rbk.money/api/key">https://dashboard.rbk.money/api/key</a>' . '</label>
+			    <label for="rbkm_api_key">' . $this->l('Api ключ') . '</label>
 			    <div class="margin-form">
 			        <textarea name="rbkm_api_key" cols="120" rows="6">' . $rbkm_api_key . '</textarea>
 			    </div>
 			    
-			    <label for="rbkm_webhook_key">' . $this->l('Ключ подписи получаемых на Webhook уведомлений из') .' <a target="_blank" href="https://dashboard.rbk.money/api/webhooks">https://dashboard.rbk.money/api/webhooks</a>' . '</label>
+			    <label for="rbkm_webhook_key">' . $this->l('Публичный ключ') . '</label>
 			    <div class="margin-form">
 			        <textarea name="rbkm_webhook_key" cols="120" rows="6">' . $rbkm_webhook_key . '</textarea>
 			    </div>
 			    
 			    
 			    <h3>' . $this->l('Кастомизация формы оплаты') . '</h3>
-		
-			    <label for="rbkm_payform_path_logo">' . $this->l('URL логотипа') . '</label>
-			    <div class="margin-form">
-			        <input type="text" name="rbkm_payform_path_logo" id="rbkm_payform_path_logo" size="121px" value="' . $rbkm_payform_path_logo . '" />
-			    </div>
 			    
 			    <label for="rbkm_payform_button_label">' . $this->l('Текст кнопки открытия формы оплаты') . '</label>
 			    <div class="margin-form">

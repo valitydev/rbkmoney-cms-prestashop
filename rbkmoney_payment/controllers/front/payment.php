@@ -11,14 +11,17 @@ if (!defined('_PS_VERSION_')) {
 class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
 {
 
-    const CHECKOUT_URL = 'https://checkout.rbk.money/html/payframe.html';
-    const COMMON_API_URL = 'https://api.rbk.money/v1/';
+    const CHECKOUT_URL = 'https://checkout.rbk.money/v1/checkout.html';
+    const COMMON_API_URL = 'https://api.rbk.money/v2/';
 
     /**
      * Create invoice settings
      */
     const CREATE_INVOICE_TEMPLATE_DUE_DATE = 'Y-m-d\TH:i:s\Z';
     const CREATE_INVOICE_DUE_DATE = '+1 days';
+
+    const HTTP_CREATED = 201;
+    const DELIVERY_TAX_MODE = "18%";
 
 
     /**
@@ -39,9 +42,9 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
             'metadata' => $this->prepareMetadata($cart),
             'dueDate' => $this->prepareDueDate(),
             'currency' => $currency->iso_code,
-            'product' => $cart->getProducts()[0]["manufacturer_name"],
+            'product' => isset($cart->getProducts()[0]["manufacturer_name"]) ? $cart->getProducts()[0]["manufacturer_name"] : "",
             'cart' => $this->prepareCart($cart),
-            'description' => '',
+            'description' => "Order " . $cart->id,
         ];
 
         $url = static::COMMON_API_URL . 'processing/invoices';
@@ -78,18 +81,18 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
 
         Rbkmoney_Payment::logger("Create invoice - finish", $logs);
 
-        if ($info['http_code'] != 201) {
+        if ($info['http_code'] != static::HTTP_CREATED) {
             Tools::redirect($this->context->link->getPageLink('order', true, NULL, "step=3"));
         }
 
 
         $response = json_decode($body, true);
 
-        $successUrl = 'http://' . htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8')
+        $successUrl = static::getCurrentSchema() . '://' . htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8')
             . __PS_BASE_URI__ . 'index.php?fc=module&module=' . $this->module->name . '&controller=success';
 
 
-        $dataCheckout = [];
+        $dataCheckout = array();
         $companyName = Configuration::get(Rbkmoney_Payment::RBKM_PAYFORM_COMPANY_NAME);
         if (!empty($companyName)) {
             $dataCheckout["name"] = $companyName;
@@ -105,11 +108,6 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
             $dataCheckout["payButtonLabel"] = $payButtonLabel;
         }
 
-        $logo = Configuration::get(Rbkmoney_Payment::RBKM_PAYFORM_PATH_LOGO);
-        if (!empty($logo)) {
-            $dataCheckout["logo"] = $logo;
-        }
-
         $customer = new Customer($cart->id_customer);
         if (!empty($customer->email)) {
             $dataCheckout['email'] = $customer->email;
@@ -121,9 +119,8 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
         $dataCheckout["invoiceAccessToken"] = $response["invoiceAccessToken"]["payload"];
 
 
-        $params = http_build_query($dataCheckout);
+        $params = http_build_query($dataCheckout, null, '&', PHP_QUERY_RFC3986);
         $checkoutUrl = static::CHECKOUT_URL . "?" . $params;
-
 
         $rbkmoney = new RBKmoney_Payment();
         $rbkmoney->validateOrder((int)$cart->id,
@@ -137,7 +134,7 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
 
     public function prepareHeaders($apiKey)
     {
-        $headers = [];
+        $headers = array();
         $headers[] = 'X-Request-ID: ' . uniqid();
         $headers[] = 'Authorization: Bearer ' . $apiKey;
         $headers[] = 'Content-type: application/json; charset=utf-8';
@@ -213,16 +210,19 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
      */
     function prepareCart(Cart $cart)
     {
-
-        $lines = [];
+        $lines = array();
         foreach ($cart->getProducts() as $product) {
 
-            $item = [];
+            $item = array();
 
             $item['product'] = $product['name'];
             $item['quantity'] = $product['quantity'];
 
-            $price = round($product['price_wt'], 2, PHP_ROUND_HALF_UP);
+            $price = number_format($product['price_wt'], 2, '.', '');
+            if ($price <= 0) {
+                continue;
+            }
+
             $item['price'] = $this->prepareAmount($price);
 
             if (!empty($product['rate'])) {
@@ -237,20 +237,22 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
             $lines[] = $item;
         }
 
-        // Доставка
+        // delivery
         /** @var Carrier $carrier */
         $carrier = $cart->getSummaryDetails()['carrier'];
         if (!$carrier->is_free && $cart->getPackageShippingCost() > 0) {
-            $item = [];
+            $item = array();
 
             $item['product'] = $carrier->name . ' (' . $carrier->delay . ')';
             $item['quantity'] = 1;
-            $item['price'] = $this->prepareAmount($cart->getPackageShippingCost());
+
+            $price = number_format($cart->getPackageShippingCost(), 2, '.', '');
+            $item['price'] = $this->prepareAmount($price);
 
             // Доставка всегда с НДС 18%?
             $taxMode = [
                 'type' => 'InvoiceLineTaxVAT',
-                'rate' => "18%",
+                'rate' => static::DELIVERY_TAX_MODE,
             ];
 
             $item['taxMode'] = $taxMode;
@@ -269,12 +271,12 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
     {
         $amount = 0;
         foreach ($cart->getProducts() as $product) {
-            $totalPrice = $product['quantity'] * round($product['price_wt'], 2, PHP_ROUND_HALF_UP);
-            $price = round($totalPrice, 2, PHP_ROUND_HALF_UP);
+            $totalPrice = $product['quantity'] * number_format($product['price_wt'], 2, '.', '');
+            $price = number_format($totalPrice, 2, '.', '');
             $amount += $price;
         }
 
-        // Добавляем доставку
+        // Added delivery
         /** @var Carrier $carrier */
         $carrier = $cart->getSummaryDetails()['carrier'];
         if (!$carrier->is_free && $cart->getPackageShippingCost() > 0) {
@@ -299,18 +301,15 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
                 return '18%';
                 break;
 
-            case '10/100':
-                return '10/110';
-                break;
-
-            case '18/118':
-                return '18/118';
-                break;
-
             default:
                 return null;
                 break;
         }
+    }
+
+    public static function getCurrentSchema()
+    {
+        return ((isset($_SERVER['HTTPS']) && preg_match("/^on$/i", $_SERVER['HTTPS'])) ? "https" : "http");
     }
 
 }

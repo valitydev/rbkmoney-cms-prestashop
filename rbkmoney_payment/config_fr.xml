@@ -2,7 +2,7 @@
 <module>
     <name>rbkmoney_payment</name>
     <displayName><![CDATA[RBKmoney système de paiement]]></displayName>
-    <version><![CDATA[1.0.0]]></version>
+    <version><![CDATA[1.0.1]]></version>
     <description><![CDATA[Accepter les paiements par RBKmoney système de paiement]]></description>
     <author><![CDATA[RBKmoney]]></author>
     <tab><![CDATA[payments_gateways]]></tab>
