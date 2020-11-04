@@ -21,7 +21,7 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
     const CREATE_INVOICE_DUE_DATE = '+1 days';
 
     const HTTP_CREATED = 201;
-    const DELIVERY_TAX_MODE = "18%";
+    const DELIVERY_TAX_MODE = "20%";
 
 
     /**
@@ -225,7 +225,8 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
 
             $item['price'] = $this->prepareAmount($price);
 
-            if (!empty($product['rate'])) {
+            $rate = trim($product['rate']);
+            if (!empty($rate)) {
                 $taxMode = [
                     'type' => 'InvoiceLineTaxVAT',
                     'rate' => $this->getRate($product['rate']),
@@ -249,7 +250,7 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
             $price = number_format($cart->getPackageShippingCost(), 2, '.', '');
             $item['price'] = $this->prepareAmount($price);
 
-            // Доставка всегда с НДС 18%?
+            // Доставка всегда с НДС 20%?
             $taxMode = [
                 'type' => 'InvoiceLineTaxVAT',
                 'rate' => static::DELIVERY_TAX_MODE,
@@ -297,8 +298,8 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
                 return '10%';
                 break;
 
-            case '18':
-                return '18%';
+            case '20':
+                return '20%';
                 break;
 
             default:
