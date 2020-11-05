@@ -275,8 +275,7 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
         $amount = 0;
         foreach ($cart->getProducts() as $product) {
             $totalPrice = $product['quantity'] * number_format($product['price_wt'], 2, '.', '');
-            $price = number_format($totalPrice, 2, '.', '');
-            $amount += $price;
+            $amount += $totalPrice;
         }
 
         // Added delivery
@@ -285,7 +284,7 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
         if (!$carrier->is_free && $cart->getPackageShippingCost() > 0) {
             $amount += $cart->getPackageShippingCost();
         }
-        return $amount;
+        return number_format($amount, 2, '.', '');
     }
 
     public function getRate($rate)
