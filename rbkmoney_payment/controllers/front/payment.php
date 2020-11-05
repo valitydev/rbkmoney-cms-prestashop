@@ -55,6 +55,7 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
         ];
         $logs = [
             'request' => $request,
+            'json' => json_encode($data),
         ];
         Rbkmoney_Payment::logger("Create invoice - begin", $logs);
 
@@ -154,7 +155,8 @@ class Rbkmoney_PaymentPaymentModuleFrontController extends ModuleFrontController
 
     function prepareAmount($amount)
     {
-        return $amount * 100;
+        $prepareAmount = $amount * 100;
+        return (int)$prepareAmount;
     }
 
     /**
